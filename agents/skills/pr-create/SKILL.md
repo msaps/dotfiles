@@ -38,11 +38,11 @@ Use the `gh` CLI for every GitHub interaction (reading, commenting, reviewing, m
 
 3. Push the current branch, using `git push -u origin HEAD` when it has no upstream.
 4. Create the PR non-interactively with the detected base branch and a temporary body file.
-5. Attempt `gh pr merge --auto --squash` unless the user opted out. Never use `--admin` and never run a non-auto merge. If squash auto-merge is unsupported, try another repository-supported strategy only with `--auto`; otherwise report that auto-merge is unavailable.
+5. Attempt `gh pr merge --auto --squash` unless the user opted out. Never use `--admin` and never run a non-auto merge. If squash auto-merge is unsupported, try another repository-supported strategy only with `--auto`. If auto-merge cannot be enabled for any reason, continue; it never blocks finalization. Report the exact reason from the command output or tool denial, distinguishing "not permitted or not authorized in this session" (for example an approval check rejecting the merge) from "unsupported by the repository" (auto-merge disabled, or no required checks or branch protection). Never describe a permission denial as "unavailable", and never retry it through another route.
 
 ## Finalization
 
-By default, hand the new PR to a sub-agent that runs the `pr-finalize` skill in a watch loop until a stop condition is met. Skip finalization when the user passes `--skip-finalization` (or says so in words, such as "don't finalize"), or when auto-merge was opted out or is unavailable, because nothing would merge the PR. In those cases report that finalization was skipped and stop.
+By default, hand the new PR to a sub-agent that runs the `pr-finalize` skill in a watch loop until a stop condition is met. Skip finalization only when the user passes `--skip-finalization` (or says so in words, such as "don't finalize"). Whether auto-merge was opted out, denied, or unsupported has no effect: finalization (addressing feedback, fixing failing checks, reporting readiness) never requires merging. When auto-merge is not enabled, the watch loop ends at the merge-ready stop condition and leaves the merge to the user. Finalization alone is the default for a plain "create a PR" request.
 
 ### Handoff
 
@@ -67,7 +67,7 @@ Activity is any new commit, review, review comment or issue comment, any check s
 | --- | --- |
 | PR merged | Merged, with what was addressed |
 | PR closed without merge | Closed |
-| PR fully mergeable: approved (review decision satisfied), no unresolved feedback, every check completed successfully, and no merge conflicts or other blocking state | Merge-ready, noting whether auto-merge is still pending |
+| PR fully mergeable: approved (review decision satisfied), no unresolved feedback, every check completed successfully, and no merge conflicts or other blocking state | Merge-ready, noting whether auto-merge is pending, or why it is not enabled and that the user must merge |
 | `pr-finalize` reports a blocked conclusion | Blocked, with the reason and what is needed |
 | 15 minutes with no activity while no checks are pending | Idle timeout, with the last known state |
 
