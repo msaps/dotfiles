@@ -4,7 +4,7 @@
 
 This repository is a home-directory bootstrap for a macOS development machine.
 
-It does not use a dotfile manager. Instead, it keeps a small set of config files in normal folders and provides separate install and link entrypoints to:
+It does not use a dotfile manager. Instead, it keeps a small set of config files in normal folders and provides separate `terminal`, `agents` and `apps` entrypoints to:
 
 1. install prerequisite tooling
 2. install packages and applications
@@ -19,10 +19,10 @@ The top-level directories are organized by target tool rather than by automation
 
 | Path | Purpose |
 | --- | --- |
-| [`Makefile`](/Users/msaps/.dotfiles/Makefile) | Public `install` and `link` entrypoints |
-| [`install.sh`](/Users/msaps/.dotfiles/install.sh) | Full machine bootstrap |
-| [`link.sh`](/Users/msaps/.dotfiles/link.sh) | Symlink-only configuration refresh |
-| [`Brewfile`](/Users/msaps/.dotfiles/Brewfile) | Homebrew formulae and casks |
+| [`Makefile`](/Users/msaps/.dotfiles/Makefile) | Public `terminal`, `agents`, `apps`, `all` entrypoints |
+| [`scripts/`](/Users/msaps/.dotfiles/scripts) | One idempotent script per target, plus shared `lib.sh` helpers |
+| [`Brewfile.cli`](/Users/msaps/.dotfiles/Brewfile.cli) | CLI formulae for `make terminal` |
+| [`Brewfile.apps`](/Users/msaps/.dotfiles/Brewfile.apps) | Development tools and casks for `make apps` |
 | [`Gemfile`](/Users/msaps/.dotfiles/Gemfile) | Ruby gem dependency manifest |
 | [`zsh/`](/Users/msaps/.dotfiles/zsh) | Shell startup files |
 | [`git/`](/Users/msaps/.dotfiles/git) | Global Git config and ignore rules |
@@ -36,21 +36,20 @@ The top-level directories are organized by target tool rather than by automation
 
 ## Bootstrap Flow
 
-Run `make install` for a full bootstrap. It invokes [`install.sh`](/Users/msaps/.dotfiles/install.sh), which currently does the following in order:
+Each Make target runs one script in [`scripts/`](/Users/msaps/.dotfiles/scripts). Every script is idempotent: it installs only what is missing, then refreshes its symlinks, so the same command is used for first-time setup and for updating. Homebrew (and Xcode Command Line Tools) are installed on demand by whichever target first needs them.
 
-1. Ensures the repo exists at `~/.dotfiles`, cloning it if needed.
-2. Installs Xcode Command Line Tools if `xcode-select` is missing.
-3. Installs Homebrew if `brew` is unavailable.
-4. Runs `brew bundle` against [`Brewfile`](/Users/msaps/.dotfiles/Brewfile).
-5. Installs Oh My Zsh and the `zsh-autosuggestions` plugin if missing.
-6. Invokes [`link.sh`](/Users/msaps/.dotfiles/link.sh) to create or refresh all managed symlinks.
-7. Copies bundled iTerm fonts into `~/Library/Fonts`.
+| Target | Script | Does |
+| --- | --- | --- |
+| `make terminal` | [`terminal.sh`](/Users/msaps/.dotfiles/scripts/terminal.sh) | `Brewfile.cli`, Oh My Zsh, `zsh-autosuggestions`, links for zsh/git/curl/tmux/brew/gh |
+| `make agents` | [`agents.sh`](/Users/msaps/.dotfiles/scripts/agents.sh) | Installs `jq` and Claude Code if their commands are missing, then links `~/.agents`, `~/.claude`, `~/.codex` |
+| `make apps` | [`apps.sh`](/Users/msaps/.dotfiles/scripts/apps.sh) | macOS Finder defaults, tap trust, `Brewfile.apps`, iTerm fonts |
+| `make all` | | `terminal`, `agents`, then `apps` |
 
-Run `make link` after pulling ordinary configuration changes. It invokes `link.sh` directly, without package installation or macOS setup. Use `make install` when bootstrap dependencies or the `Brewfile` changed.
+When Homebrew's Cellar is not writable (for example a managed work machine), package installs are logged as skipped and linking still runs. Targets can be combined, e.g. `make terminal agents`.
 
 ## Symlink Map
 
-The repo uses explicit symlinks rather than a generated map. This is the current behavior of [`link.sh`](/Users/msaps/.dotfiles/link.sh):
+The repo uses explicit symlinks rather than a generated map. This is the current behavior of [`terminal.sh`](/Users/msaps/.dotfiles/scripts/terminal.sh) and [`agents.sh`](/Users/msaps/.dotfiles/scripts/agents.sh):
 
 | Repo file | Linked location |
 | --- | --- |
@@ -89,7 +88,7 @@ The repo uses explicit symlinks rather than a generated map. This is the current
 
 ### Development Tooling
 
-[`Brewfile`](/Users/msaps/.dotfiles/Brewfile) is the machine bootstrap inventory. Right now it installs:
+The Brewfiles are the package inventory, split by target: `Brewfile.cli` (terminal) and `Brewfile.apps` (apps). Between them they install:
 
 - CLI tools like `git`, `gh`, `curl`, `aria2`, and `cloc`
 - development tools like `go`, `rbenv`, `volta`, `swiftlint`, `vapor`, and `xcodes`
@@ -121,7 +120,7 @@ The script uses Bash, Git, and `jq`, like the existing push hook. Codex allows i
 "$HOME/.agents/hooks/git-session-sync.sh" --cwd "$PWD"
 ```
 
-Run `make link` to install the managed hook files. In Codex, review and trust the new hook through `/hooks` before its first run; hook trust stays in local configuration and is not bootstrapped or committed. See the [official hook documentation](https://learn.chatgpt.com/docs/hooks). Run `bash tests/git-session-sync.sh` to exercise sync behavior against temporary local repositories.
+Run `make agents` to install the managed hook files. In Codex, review and trust the new hook through `/hooks` before its first run; hook trust stays in local configuration and is not bootstrapped or committed. See the [official hook documentation](https://learn.chatgpt.com/docs/hooks). Run `bash tests/git-session-sync.sh` to exercise sync behavior against temporary local repositories.
 
 [`codex/rules/default.rules`](/Users/msaps/.dotfiles/codex/rules/default.rules) manages durable Codex command approvals and denials, aligned with the intent of Claude's permission lists where the clients expose equivalent controls.
 
@@ -142,8 +141,8 @@ Those assumptions are fine for a personal machine bootstrap, but they are worth 
 When adding a new managed config:
 
 1. Store the source file in a tool-specific folder in the repo.
-2. Add the corresponding symlink step to [`link.sh`](/Users/msaps/.dotfiles/link.sh).
-3. If the tool needs installation, add it to [`Brewfile`](/Users/msaps/.dotfiles/Brewfile) or document the manual step.
+2. Add the corresponding symlink step to the matching script in [`scripts/`](/Users/msaps/.dotfiles/scripts) (`terminal.sh` or `agents.sh`).
+3. If the tool needs installation, add it to `Brewfile.cli` or `Brewfile.apps` (or a `brew_ensure` call for agent prerequisites), or document the manual step.
 4. Update this guide if the bootstrap flow or symlink map changes.
 
 Keeping those three pieces in sync is the main maintenance rule for this project.

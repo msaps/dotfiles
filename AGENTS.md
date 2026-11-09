@@ -13,10 +13,10 @@ All changes must be agent-agnostic by design, ensure that they work with both Co
 - Keep client-specific behavior out of `agents/`. Anything that only applies
   to one client belongs under `claude/` or `codex/` instead.
 - After touching anything under `agents/`, `claude/`, or `codex/`, run `make
-  link` to confirm the symlinks it creates still resolve correctly.
+  agents` to confirm the symlinks it creates still resolve correctly.
 
 ## Two different "agent instructions" files
-- `agents/AGENTS.md` is the **global** shared instruction file. `link.sh`
+- `agents/AGENTS.md` is the **global** shared instruction file. `scripts/agents.sh`
   symlinks it to `~/.agents/AGENTS.md`, `~/.claude/CLAUDE.md`, and
   `~/.codex/AGENTS.md`, so it applies to every project on the machine, not
   just this repo.

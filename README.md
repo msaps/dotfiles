@@ -5,29 +5,26 @@ Personal macOS dotfiles used for two jobs:
 1. Keep everyday shell and tool configuration under version control.
 2. Bootstrap a fresh machine by installing packages and wiring the managed files into `$HOME`.
 
-The repository is intentionally simple. Most folders mirror a target location in the home directory. `make install` bootstraps a machine, while `make link` only refreshes the managed symlinks.
+The repository is intentionally simple. Most folders mirror a target location in the home directory. Setup is split into `make terminal`, `make agents` and `make apps`, so each machine only runs what it needs.
 
 ## Quick Start
 
-Clone the repo into `~/.dotfiles` and run the installer:
+Clone the repo into `~/.dotfiles` and run the targets you need:
 
 ```bash
 git clone https://github.com/msaps/Dotfiles.git ~/.dotfiles
-make -C ~/.dotfiles install
-```
-
-If the repo is already present:
-
-```bash
 cd ~/.dotfiles
-make install
+make help
 ```
 
-To refresh configuration without installing packages or changing macOS settings:
+| Target | Does |
+| --- | --- |
+| `make terminal` | CLI tools, Oh My Zsh, and shell/git/tmux/gh config |
+| `make agents` | AI agent prerequisites and config (Claude Code, Codex) |
+| `make apps` | Homebrew apps, fonts, and macOS defaults |
+| `make all` | Everything above |
 
-```bash
-make link
-```
+Targets combine (`make terminal agents`) and are idempotent: anything already installed is skipped and the symlinks are simply refreshed. On a machine where Homebrew is read-only, package installs are skipped and linking still happens.
 
 ## What This Repo Manages
 
@@ -65,12 +62,10 @@ custom agent definitions in `codex/agents/`, and shared workflows in
 
 ## Updating
 
-Pull the latest changes and refresh the symlinks:
+Pull the latest changes and rerun the targets you use:
 
 ```bash
 cd ~/.dotfiles
 git pull --rebase
-make link
+make terminal agents
 ```
-
-Use `make install` instead when bootstrap dependencies or the `Brewfile` changed.

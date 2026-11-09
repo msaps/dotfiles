@@ -1,14 +1,3 @@
-# Core CLI Tools
-brew "git"
-brew "gh"
-brew "curl"
-brew "aria2"
-brew "cloc"
-brew "fzf"
-brew "btop"
-brew "tmux"
-brew "lazygit"
-
 # Development
 brew "go"
 brew "swiftlint"
@@ -28,7 +17,6 @@ cask "rapidapi"
 cask "sf-symbols"
 
 # Applications - AI
-cask "claude-code"
 cask "claude"
 
 # Applications - Utilities

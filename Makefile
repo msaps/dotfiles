@@ -1,9 +1,18 @@
-DOTFILES_DIR := $(shell cd "$(dir $(lastword $(MAKEFILE_LIST)))" && pwd)
+SCRIPTS := $(dir $(lastword $(MAKEFILE_LIST)))scripts
 
-.PHONY: install link
+.DEFAULT_GOAL := help
+.PHONY: help terminal agents apps all
 
-install:
-	@bash "$(DOTFILES_DIR)/install.sh"
+help: ## Show available targets
+	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-10s %s\n", $$1, $$2}'
 
-link:
-	@bash "$(DOTFILES_DIR)/link.sh"
+terminal: ## CLI tools, Oh My Zsh, and shell/git/tmux/gh config
+	@bash "$(SCRIPTS)/terminal.sh"
+
+agents: ## AI agent prerequisites and config (Claude Code, Codex)
+	@bash "$(SCRIPTS)/agents.sh"
+
+apps: ## Homebrew apps, fonts, and macOS defaults
+	@bash "$(SCRIPTS)/apps.sh"
+
+all: terminal agents apps ## Everything

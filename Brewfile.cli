@@ -1,0 +1,10 @@
+# Core CLI tools for the terminal environment
+brew "git"
+brew "gh"
+brew "curl"
+brew "aria2"
+brew "cloc"
+brew "fzf"
+brew "btop"
+brew "tmux"
+brew "lazygit"
