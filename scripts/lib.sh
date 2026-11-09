@@ -67,3 +67,17 @@ brew_ensure() {
         brew install "$@"
     fi
 }
+
+# Install a Homebrew cask only when its app bundle is not already present.
+# Usage: brew_ensure_app <App.app> <cask>
+brew_ensure_app() {
+    local app="$1" cask="$2"
+    [ -d "/Applications/$app" ] || [ -d "$HOME/Applications/$app" ] && return 0
+    ensure_homebrew
+    if [ ! -w "$(brew --prefix)/Cellar" ]; then
+        log "Skipping $cask install (no write access to $(brew --prefix)/Cellar)"
+    else
+        log "Installing $cask..."
+        brew install --cask "$cask"
+    fi
+}

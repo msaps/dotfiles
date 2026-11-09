@@ -5,7 +5,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 brew_ensure jq jq
 brew_ensure claude --cask claude-code
-brew_ensure codex --cask codex
+brew_ensure_app ChatGPT.app chatgpt
 
 log "Linking AI agent configuration..."
 ensure_dir "$HOME/.agents"

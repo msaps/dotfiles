@@ -41,7 +41,7 @@ Each Make target runs one script in [`scripts/`](/Users/msaps/.dotfiles/scripts)
 | Target | Script | Does |
 | --- | --- | --- |
 | `make terminal` | [`terminal.sh`](/Users/msaps/.dotfiles/scripts/terminal.sh) | `Brewfile.cli`, Oh My Zsh, `zsh-autosuggestions`, links for zsh/git/curl/tmux/brew/gh |
-| `make agents` | [`agents.sh`](/Users/msaps/.dotfiles/scripts/agents.sh) | Installs `jq`, Claude Code and Codex if their commands are missing, then links `~/.agents`, `~/.claude`, `~/.codex` |
+| `make agents` | [`agents.sh`](/Users/msaps/.dotfiles/scripts/agents.sh) | Installs `jq` and Claude Code if their commands are missing, and the ChatGPT app (Codex) if its app bundle is missing, then links `~/.agents`, `~/.claude`, `~/.codex` |
 | `make apps` | [`apps.sh`](/Users/msaps/.dotfiles/scripts/apps.sh) | macOS Finder defaults, tap trust, `Brewfile.apps`, iTerm fonts |
 | `make all` | | `terminal`, `agents`, then `apps` |
 
