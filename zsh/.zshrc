@@ -11,6 +11,9 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 export PATH="$HOME/.local/bin:$PATH"
 export HOMEBREW_NO_ENV_HINTS=1
 
+# PNPM
+export PATH="$HOME/Library/pnpm/bin:$PATH"
+
 # Rbenv
 export PATH="$HOME/.rbenv/bin:$PATH"
 eval "$(rbenv init - zsh)"
